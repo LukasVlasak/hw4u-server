@@ -1,4 +1,4 @@
-node_modules
+node_modules/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -10,3 +10,5 @@ node_modules
 *.sln
 *.sw
 .env
+package-lock.json
+logs/*

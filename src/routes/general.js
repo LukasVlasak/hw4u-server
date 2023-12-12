@@ -1,12 +1,12 @@
 const router = require("express").Router();
 const pool = require("../db/db");
 const getAllQuery = require("../db/queries");
-const { task } = require("../services/validation");
+const { generalQuestion } = require("../services/validation");
 const { sendAndLog, validate } = require("../utils/sendMailAndLog");
 
 router.get("/", (req, res) => {
   pool
-    .query(getAllQuery("tasks"))
+    .query(getAllQuery("general"))
     .then((response) => {
       res.status(200).send(response.rows);
     })
@@ -18,17 +18,14 @@ router.get("/", (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    validate(task, req.body);
+    validate(generalQuestion, req.body);
     const response = await pool.query(
-      "INSERT INTO public.tasks (title, willing_to_pay, category, due_date, user_id, description, for_user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, title, willing_to_pay, category, due_date, user_id, description, for_user_id, created_date",
+      "INSERT INTO public.general (user_id, title, description, category) VALUES ($1, $2, $3, $4) RETURNING id, user_id, title, description, category, created_date",
       [
-        req.body.title,
-        req.body.willing_to_pay,
-        req.body.category,
-        req.body.due_date,
         req.body.user_id,
+        req.body.title,
         req.body.description,
-        req.body.for_user_id,
+        req.body.category,
       ]
     );
     res.status(200).send(response.rows);
