@@ -1,22 +1,16 @@
 const router = require("express").Router();
 const pool = require("../db/db");
 const getAllQuery = require("../db/queries");
+const auth = require("../middlewares/auth");
+const checkPermissions = require("../middlewares/permissions");
 const { answer } = require("../services/validation");
 const { sendAndLog, validate } = require("../utils/sendMailAndLog");
 
-router.get("/", (req, res) => {
-  pool
-    .query(getAllQuery("answers"))
-    .then((response) => {
-      res.status(200).send(response.rows);
-    })
-    .catch((error) => {
-      sendAndLog(error);
-      res.status(500).send({ message: error.message });
-    });
+router.get("/:id", auth, checkPermissions("answer permission") ,(req, res) => {
+  res.status(200).send(req.answer.rows[0]);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, checkPermissions("subscription"), async (req, res) => {
   try {
     validate(answer, req.body);
     const response = await pool.query(

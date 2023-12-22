@@ -16,7 +16,7 @@ const sendAndLog = (error) => {
 module.exports = {
   sendAndLog,
   validate: (schema, objectToValidate) => {
-    const { error, value } = schema.validate(objectToValidate);
+    const { error, value } = schema.validate(objectToValidate, {abortEarly: false});
     if (error) {
         throw error;
     }

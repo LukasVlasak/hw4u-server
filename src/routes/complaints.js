@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const pool = require("../db/db");
 const getAllQuery = require("../db/queries");
+const auth = require("../middlewares/auth");
 const { complaint } = require("../services/validation");
 const { sendAndLog, validate } = require("../utils/sendMailAndLog");
 
@@ -16,7 +17,7 @@ router.get("/", (req, res) => {
     });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     validate(complaint, req.body);
     const response = await pool.query(

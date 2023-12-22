@@ -11,12 +11,12 @@ module.exports = {
         for_user_id: Joi.number(),
     }),
     user: Joi.object({
-        name: Joi.string().required().max(30),
+        name: Joi.string().required().min(3).max(30).regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/),
         email: Joi.string().required().max(40),
         password: Joi.string().required(),
         country: Joi.string().required().max(30),
         subscription: Joi.string().max(30),
-
+        username: Joi.string().min(3).max(15).regex(/[a-zA-Z0-9\.]/)
     }),
     answer: Joi.object({
         title: Joi.string().required().max(50),
