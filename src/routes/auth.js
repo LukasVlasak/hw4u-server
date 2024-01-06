@@ -4,6 +4,7 @@ const { auth } = require("../services/validation");
 const { sendAndLog, validate, signJWT } = require("../utils/sendMailAndLog");
 const bcrypt = require("bcrypt");
 const authF = require("../middlewares/auth");
+const { signedCookie } = require("cookie-parser");
 
 router.post("/", async (req, res) => {
   try {
@@ -19,8 +20,18 @@ router.post("/", async (req, res) => {
       user.rows[0].password
     );
     if (!result) return res.status(400).send({ message: "Bad password", type: "password", errorCode: "badPassword" });
+
     const token = signJWT({ _id: user.rows[0].id });
     res.set("Access-Control-Expose-Headers", "x-auth-token");
+
+    // cookies
+    if (req.body.rememberMe) {
+      const currentDate = new Date();
+      const expirationDate = new Date(currentDate);
+      expirationDate.setMonth(currentDate.getMonth() + 1);
+      res.cookie("x-auth-token", token, {httpOnly: true, signed: true, expires: expirationDate});
+    }
+
     res
       .status(200)
       .setHeader("x-auth-token", token)
@@ -36,11 +47,19 @@ router.get("/", authF, (req, res) => {
     .query("SELECT * from users WHERE id = $1", [req.user._id])
     .then((response) => {
       if (response.rowCount === 0) return res.status(400).send({message: "This user no longer exists"});
+
       res.status(200).send(response.rows);
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
     });
 });
+
+router.post("/logout", authF, (req, res) => {
+  if (req.signedCookies["x-auth-token"] != null) {
+    res.clearCookie("x-auth-token");
+  }
+  res.status(200).send({message: "Success logout"});
+})
 
 module.exports = router;

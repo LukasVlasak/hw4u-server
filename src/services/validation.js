@@ -45,6 +45,7 @@ module.exports = {
     }),
     auth: Joi.object({
         email: Joi.string().required().max(50),
-        password: Joi.string().required()
+        password: Joi.string().required(),
+        rememberMe: Joi.bool(),
     }),
 }

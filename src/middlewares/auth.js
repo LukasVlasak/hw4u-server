@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const auth = (req, res, next) => {
-  const token = req.get("x-auth-token");
+  const token = req.get("x-auth-token") || req.signedCookies["x-auth-token"];
   if (!token) {
     res.status(400).send({ message: "No token provided" });
   } else {
