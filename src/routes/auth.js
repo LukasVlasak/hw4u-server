@@ -35,7 +35,7 @@ router.post("/", async (req, res) => {
     res
       .status(200)
       .setHeader("x-auth-token", token)
-      .send({ message: "success" });
+      .send(user.rows[0]);
   } catch (err) {
     sendAndLog(err);
     res.status(500).send({ message: err.message });

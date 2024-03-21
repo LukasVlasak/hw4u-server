@@ -40,4 +40,22 @@ router.post("/", async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 });
+
+router.get("/:id", auth, (req, res) => {
+  if (isNaN(parseInt(req.params.id))) {
+    return res.status(500).send({message: "Not a number"});
+  }
+
+  pool.query("SELECT * from users WHERE id = $1", [req.params.id]).then((response) => {
+    const user = response.rows;
+    if (user.length > 0) {
+      res.status(200).send(user);
+    }else {
+      res.status(500).send({message: "This user does not exists"});
+    }
+  }).catch((err) => {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  });
+});
 module.exports = router;
