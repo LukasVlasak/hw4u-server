@@ -4,7 +4,9 @@ const helmet = require("helmet");
 const app = express();
 const tasks = require("./src/routes/tasks");
 const users = require("./src/routes/users");
+const documents = require("./src/routes/documents");
 const auth = require("./src/routes/auth");
+const reviews = require("./src/routes/reviews");
 const answers = require("./src/routes/answers");
 const { sendAndLog } = require("./src/utils/sendMailAndLog");
 const cors = require("cors");
@@ -45,6 +47,8 @@ app.use("/api/answers", answers);
 app.use("/api/auth", auth);
 app.use("/api/users", users);
 app.use("/api/tasks", tasks);
+app.use("/api/reviews", reviews);
+app.use("/api/documents", documents);
 
 app.get("/api/data", (req, res) => {
   if (req.query.parameter) {

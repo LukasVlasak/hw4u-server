@@ -5,10 +5,15 @@ module.exports = {
         title: Joi.string().required().max(50),
         willing_to_pay: Joi.number().required(),
         category: Joi.string().required().max(30),
-        due_date: Joi.date(),
-        user_id: Joi.number().required(),
+        due_date: Joi.date().allow(null),
+        user_id: Joi.number(),
         description: Joi.string().required().max(100),
-        for_user_id: Joi.number(),
+    }),
+    review: Joi.object({
+        text: Joi.string().required().min(10).max(50),
+        user_name: Joi.string().required().min(3).max(50),
+        user_id: Joi.number().required(),
+        stars: Joi.number().required()
     }),
     user: Joi.object({
         name: Joi.string().required().min(3).max(30).regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/),
@@ -19,8 +24,7 @@ module.exports = {
         username: Joi.string().min(3).max(15).regex(/[a-zA-Z0-9\.]/)
     }),
     answer: Joi.object({
-        title: Joi.string().required().max(50),
-        description: Joi.string().required().max(100),
+        description: Joi.string().required().max(300),
         task_id: Joi.number().required(),
         user_id: Joi.number().required()
     }),
