@@ -8,6 +8,7 @@ const documents = require("./src/routes/documents");
 const auth = require("./src/routes/auth");
 const reviews = require("./src/routes/reviews");
 const answers = require("./src/routes/answers");
+const feedback = require("./src/routes/feedback");
 const { sendAndLog } = require("./src/utils/sendMailAndLog");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -26,6 +27,7 @@ app.use(
     optionsSuccessStatus: 200,
     origin: process.env.CORS_ORIGIN,
     credentials: true,
+    withCredentials: true,
   })
 );
 app.use(cookieParser(process.env.COOKIE_KEY));
@@ -40,15 +42,18 @@ app.use((error, req, res, next) => {
     sendAndLog(error);
     res.status(500).send({ message: error.message });
   } else {
+    res.setHeader("Access-Control-Allow-Origin", process.env.CORS_ORIGIN);
+    res.setHeader("Access-Control-Allow-Credentials", true);
     next();
   }
 });
-app.use("/api/answers", answers);
+//app.use("/api/answers", answers);
 app.use("/api/auth", auth);
 app.use("/api/users", users);
 app.use("/api/tasks", tasks);
 app.use("/api/reviews", reviews);
-app.use("/api/documents", documents);
+// app.use("/api/documents", documents);
+app.use("/api/feedback", feedback);
 
 app.get("/api/data", (req, res) => {
   if (req.query.parameter) {

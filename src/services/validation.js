@@ -10,18 +10,18 @@ module.exports = {
         description: Joi.string().required().max(100),
     }),
     review: Joi.object({
-        text: Joi.string().required().min(10).max(50),
-        user_name: Joi.string().required().min(3).max(50),
-        user_id: Joi.number().required(),
+        text: Joi.string().required().min(2).max(300).regex(/^[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ\!\?\.\,\s0-9]+$/),
+        for_app_user_id: Joi.number().required(),
         stars: Joi.number().required()
     }),
+    feedback: Joi.object({
+        message: Joi.string().required().min(10).max(300).regex(/^[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ\!\?\.\,0-9]+$/),
+    }),
     user: Joi.object({
-        name: Joi.string().required().min(3).max(30).regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/),
+        full_name: Joi.string().required().min(3).max(50).regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/),
         email: Joi.string().required().max(40),
         password: Joi.string().required(),
-        country: Joi.string().required().max(30),
-        subscription: Joi.string().max(30),
-        username: Joi.string().min(3).max(15).regex(/[a-zA-Z0-9\.]/)
+        username: Joi.string().min(3).max(15).regex(/[a-zA-Z0-9\.]/).allow("")
     }),
     answer: Joi.object({
         description: Joi.string().required().max(300),
