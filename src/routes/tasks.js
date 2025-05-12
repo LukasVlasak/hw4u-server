@@ -4,7 +4,32 @@ const getAllQuery = require("../db/queries");
 const auth = require("../middlewares/auth");
 const { task } = require("../services/validation");
 const { sendAndLog, validate } = require("../utils/sendMailAndLog");
+const { deleteAnswer } = require("./answers");
 
+const deleteTask = async (taskId) => {
+  const response = await pool.query(
+    "DELETE FROM task WHERE task_id = $1 RETURNING task_id",
+    [taskId]
+  );
+  if (response.rowCount === 0) {
+    return false;
+  }
+
+  const answers = await pool.query(
+    "SELECT answer_id from answer WHERE task_id = $1",
+    [taskId]
+  );
+
+  if (answers.rowCount > 0) {
+    for (let i = 0; i < answers.rowCount; i++) {
+      await deleteAnswer(answers.rows[i].answer_id);
+    }
+  }
+  
+  return true;
+}
+
+module.exports.deleteTask = deleteTask;
 // router.get("/with-users", async (req, res) => {
 //   try {
 //     const response = await pool.query(`

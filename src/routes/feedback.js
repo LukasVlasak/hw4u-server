@@ -5,6 +5,18 @@ const { feedback } = require("../services/validation");
 const { sendAndLog, validate } = require("../utils/sendMailAndLog");
 const {authUser, authAdmin} = require("../middlewares/auth");
 
+const deleteFeedback = async (feedbackId) => {
+  const response = await pool.query(
+    "DELETE FROM feedback WHERE feedback_id = $1 RETURNING feedback_id",
+    [feedbackId]
+  );
+  if (response.rowCount === 0) {
+    return false;
+  }
+  return true;
+}
+module.exports.deleteFeedback = deleteFeedback;
+
 router.get("/", (req, res) => {
   pool
     .query("SELECT f.*, u.full_name, u.email FROM feedback f left join app_user u on f.app_user_id = u.app_user_id")
@@ -15,6 +27,38 @@ router.get("/", (req, res) => {
       sendAndLog(error);
       res.status(500).send({ message: error.message });
     });
+});
+
+router.get("/:id", authAdmin, async (req, res) => {
+  try {
+    const response = await pool.query(
+      "SELECT f.*, u.full_name, u.email FROM feedback f left join app_user u on f.app_user_id = u.app_user_id WHERE f.feedback_id = $1",
+      [req.params.id]
+    );
+    if (response.rowCount === 0) {
+      return res.status(404).send({ message: "Feedback not found" });
+    }
+    res.status(200).send(response.rows);
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
+});
+
+router.put("/:id", authAdmin, async (req, res) => {
+  try {
+    const response = await pool.query(
+      "UPDATE feedback SET is_resolved = true WHERE feedback_id = $1 RETURNING *",
+      [req.params.id]
+    );
+    if (response.rowCount === 0) {
+      return res.status(404).send({ message: "Feedback not found" });
+    }
+    res.status(200).send(response.rows);
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
 });
 
 router.post("/", authUser, async (req, res) => {

@@ -1,4 +1,4 @@
-// const router = require("express").Router();
+const router = require("express").Router();
 // const pool = require("../db/db");
 // const path = require("path");
 // const getAllQuery = require("../db/queries");
@@ -8,6 +8,31 @@
 // const { sendAndLog, validate } = require("../utils/sendMailAndLog");
 // const upload = require("../services/multer");
 
+const { deleteDocument } = require("./documents");
+
+const deleteAnswer = async (answerId) => {
+    const response = await pool.query(
+        "DELETE FROM answer WHERE id = $1 RETURNING id",
+        [answerId]
+    );
+    if (response.rowCount === 0) {
+        return false;
+    }
+
+    const documents = await pool.query(
+        "SELECT document_id from document WHERE answer_id = $1",
+        [answerId]
+    );
+
+    if (documents.rowCount > 0) {
+        for (let i = 0; i < documents.rowCount; i++) {
+            await deleteDocument(documents.rows[i].document_id);
+        }
+    }
+    return true;
+}
+
+module.exports.deleteAnswer = deleteAnswer;
 // router.get("/by-user", auth, async (req, res) => {
 //   try {
 //     const response = await pool.query(`
@@ -121,4 +146,4 @@
 //   }
 // });
 
-// module.exports = router;
+module.exports = router;

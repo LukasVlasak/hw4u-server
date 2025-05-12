@@ -5,6 +5,17 @@ const { review } = require("../services/validation");
 const { sendAndLog, validate } = require("../utils/sendMailAndLog");
 const auth = require("../middlewares/auth");
 
+const deleteReview = async (reviewId) => {
+  const response = await pool.query(
+    "DELETE FROM review WHERE review_id = $1 RETURNING review_id",
+    [reviewId]
+  );
+  if (response.rowCount === 0) {
+    return false;
+  }
+  return true;
+}
+module.exports.deleteReview = deleteReview;
 // router.get("/", (req, res) => {
 //   pool
 //     .query(getAllQuery("reviews"))
@@ -24,6 +35,49 @@ router.get("/by-user/:id", async (req, res) => {
       [req.params.id]
     );
     res.status(200).send(response.rows);
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const response = await pool.query(
+      "SELECT r.review_id, r.text, r.app_user_id, u.email, uu.email as for_user_email, r.stars FROM review r left join app_user u on u.app_user_id = r.app_user_id left join app_user uu on uu.app_user_id = r.for_app_user_id"
+    );
+    res.status(200).send(response.rows);
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
+}
+);
+
+router.get("/:id", auth.authAdmin, async (req, res) => {
+  try {
+    const response = await pool.query(
+      "SELECT r.review_id, r.text, r.app_user_id, u.email, uu.email as for_user_email, r.stars FROM review r left join app_user u on u.app_user_id = r.app_user_id left join app_user uu on uu.app_user_id = r.for_app_user_id WHERE r.review_id = $1",
+      [req.params.id]
+    );
+    if (response.rowCount === 0) {
+      return res.status(404).send({ message: "Review not found" });
+    }
+    res.status(200).send(response.rows);
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
+});
+
+router.delete("/admin/:id", auth.authAdmin, async (req, res) => {
+  try {
+    const status = await deleteReview(req.params.id);
+    if (status) {
+      res.status(200).send({ message: "Review deleted successfully" });
+    } else {
+      res.status(404).send({ message: "Review not found" });
+    }
   } catch (err) {
     sendAndLog(err);
     res.status(500).send({ message: err.message });

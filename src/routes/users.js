@@ -3,8 +3,65 @@ const pool = require("../db/db");
 const getAllQuery = require("../db/queries");
 const { user } = require("../services/validation");
 const { sendAndLog, validate, signJWT } = require("../utils/sendMailAndLog");
-const {authUser} = require("../middlewares/auth");
+const {authUser, authAdmin} = require("../middlewares/auth");
 const bcrypt = require("bcrypt");
+const { deleteAnswer } = require("./answers");
+const { deleteTask } = require("./tasks");
+const { deleteFeedback } = require("./feedback");
+const { deleteReview } = require("./reviews");
+
+const deleteUser = async (userId) => {
+  const response = await pool.query(
+    "DELETE FROM app_user WHERE app_user_id = $1 RETURNING app_user_id",
+    [userId]
+  );
+  if (response.rowCount === 0) {
+    return false;
+  }
+
+  const answers = await pool.query(
+    "SELECT answer_id from answer WHERE app_user_id = $1",
+    [userId]
+  );
+
+  if (answers.rowCount > 0) {
+    for (let i = 0; i < answers.rowCount; i++) {
+      await deleteAnswer(answers.rows[i].answer_id);
+    }
+  }
+
+  const tasks = await pool.query(
+    "SELECT task_id from task WHERE app_user_id = $1",
+    [userId]
+  );
+  if (tasks.rowCount > 0) {
+    for (let i = 0; i < tasks.rowCount; i++) {
+      await deleteTask(tasks.rows[i].task_id);
+    }
+  }
+
+  const feedback = await pool.query(
+    "SELECT feedback_id from feedback WHERE app_user_id = $1",
+    [userId]
+  );
+  if (feedback.rowCount > 0) {
+    for (let i = 0; i < feedback.rowCount; i++) {
+      await deleteFeedback(feedback.rows[i].feedback_id);
+    }
+  }
+
+  const reviews = await pool.query(
+    "SELECT review_id from review WHERE for_app_user_id = $1",
+    [userId]
+  );
+  if (reviews.rowCount > 0) {
+    for (let i = 0; i < reviews.rowCount; i++) {
+      await deleteReview(reviews.rows[i].review_id);
+    }
+  }
+  
+  return true;
+};
 
 router.get("/", (req, res) => {
   pool
@@ -24,7 +81,6 @@ router.get("/", (req, res) => {
 router.put("/", authUser, async (req, res) => {
   try {
     const userParams = req.body;
-    console.log(userParams);
     
     const email = await pool.query("SELECT * from app_user WHERE email = $1 AND app_user_id != $2", [userParams.email, req.user.app_user_id]);
     if (email.rowCount > 0) return res.status(400).send({message: 'sorry user with that email already exist', errorCode: 'emailAlreadyExists', type: 'email'});
@@ -86,6 +142,36 @@ router.post("/", async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 });
+
+router.put("/:id", authAdmin, async (req, res) => {  
+  if (isNaN(parseInt(req.params.id))) {
+    return res.status(500).send({message: "Not a number"});
+  }
+  try {
+    await pool.query("UPDATE app_user SET is_admin = $1, full_name = $2 WHERE app_user_id = $3", [req.body.is_admin, req.body.full_name, req.params.id]);
+    res.status(200).send({message: "User updated"});
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
+});
+
+router.delete("/:id", authAdmin, async (req, res) => {
+  if (isNaN(parseInt(req.params.id))) {
+    return res.status(500).send({message: "Not a number"});
+  }
+  try {
+    const status = await deleteUser(req.params.id);
+    if (status) {
+      res.status(200).send({message: "User deleted"});
+    } else {
+      res.status(500).send({message: "User not found"});
+    }
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
+})
 
 router.get("/:id", (req, res) => {
   if (isNaN(parseInt(req.params.id))) {

@@ -17,6 +17,11 @@ module.exports = {
     feedback: Joi.object({
         message: Joi.string().required().min(10).max(300).regex(/^[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ\!\?\.\,0-9]+$/),
     }),
+    adminPayment: Joi.object({
+        email: Joi.string().required().max(40),
+        password: Joi.string().required(),
+        productId: Joi.number().required(),
+    }),
     user: Joi.object({
         full_name: Joi.string().required().min(3).max(50).regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/),
         email: Joi.string().required().max(40),
