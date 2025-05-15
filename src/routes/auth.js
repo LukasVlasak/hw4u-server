@@ -66,4 +66,4 @@ router.post("/logout", authUser, (req, res) => {
   }
 })
 
-module.exports = router;
+module.exports = {router};

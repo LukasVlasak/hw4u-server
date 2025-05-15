@@ -2,20 +2,20 @@ const Joi = require("joi");
 
 module.exports = {
     task: Joi.object({
-        title: Joi.string().required().max(50),
-        willing_to_pay: Joi.number().required(),
-        category: Joi.string().required().max(30),
-        due_date: Joi.date().allow(null),
-        user_id: Joi.number(),
-        description: Joi.string().required().max(100),
+        title: Joi.string().required().max(50).regex(/^[a-zA-Zěščřžýáíéů úĚŠČŘŽÝÁÍÉŮÚ\-\/\!\?\.\,\s0-9]+$/),
+        price: Joi.number().required(),
+        description: Joi.string().required().max(300).regex(/^[a-zA-Zěščřžýá íéůúĚŠČŘŽÝÁÍÉŮÚ\-\/\!\?\.\,\s0-9]+$/),
+        due_date: Joi.string(),
+        category_id: Joi.number().required(),
+        task_id: Joi.number(),
     }),
     review: Joi.object({
-        text: Joi.string().required().min(2).max(300).regex(/^[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ\!\?\.\,\s0-9]+$/),
+        text: Joi.string().required().min(2).max(300).regex(/^[a-zA-Zěščřžýáí éůúĚŠČŘŽÝÁÍÉŮÚ\!\?\.\,\s0-9]+$/),
         for_app_user_id: Joi.number().required(),
         stars: Joi.number().required()
     }),
     feedback: Joi.object({
-        message: Joi.string().required().min(10).max(300).regex(/^[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ\!\?\.\,0-9]+$/),
+        message: Joi.string().required().min(10).max(300).regex(/^[a-zA-Zěščřžýáíé ůúĚŠČŘŽÝÁÍÉŮÚ\!\?\.\,0-9]+$/),
     }),
     adminPayment: Joi.object({
         email: Joi.string().required().max(40),
@@ -23,15 +23,16 @@ module.exports = {
         productId: Joi.number().required(),
     }),
     user: Joi.object({
-        full_name: Joi.string().required().min(3).max(50).regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/),
+        full_name: Joi.string().required().min(3).max(50).regex(/[a-zA-Zěščřžýáíé ůúĚŠČŘŽÝÁÍÉŮÚ]/),
         email: Joi.string().required().max(40),
         password: Joi.string().required(),
         username: Joi.string().min(3).max(15).regex(/[a-zA-Z0-9\.]/).allow("")
     }),
     answer: Joi.object({
-        description: Joi.string().required().max(300),
+        full_answer: Joi.string().max(600).regex(/^[a-zA-Zěščřžýáíé\sůúĚŠČŘŽÝÁÍÉŮÚ\/\\\!\?\.\,0-9]+$/),
+        preview: Joi.string().max(300).regex(/^[a-zA-Zěščřžýáíé\sůúĚŠČŘŽÝÁÍÉŮÚ\/\\\!\?\.\,0-9]+$/),
+        title: Joi.string().max(50).regex(/^[a-zA-Zěščřžýáíé\sůúĚŠČŘŽÝÁÍÉŮÚ\/\\\!\?\.\,0-9]+$/).required(),
         task_id: Joi.number().required(),
-        user_id: Joi.number().required()
     }),
     general: Joi.object({
         user_id: Joi.number().required(),

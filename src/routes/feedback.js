@@ -4,6 +4,7 @@ const getAllQuery = require("../db/queries");
 const { feedback } = require("../services/validation");
 const { sendAndLog, validate } = require("../utils/sendMailAndLog");
 const {authUser, authAdmin} = require("../middlewares/auth");
+const multiUpload = require("../services/multer");
 
 const deleteFeedback = async (feedbackId) => {
   const response = await pool.query(
@@ -15,7 +16,6 @@ const deleteFeedback = async (feedbackId) => {
   }
   return true;
 }
-module.exports.deleteFeedback = deleteFeedback;
 
 router.get("/", (req, res) => {
   pool
@@ -27,6 +27,18 @@ router.get("/", (req, res) => {
       sendAndLog(error);
       res.status(500).send({ message: error.message });
     });
+});
+
+router.get("/unresolved", authAdmin, async (req, res) => {
+  try {
+    const response = await pool.query(
+      "SELECT * from get_users_with_unresolved_feedback_in_category()"
+    );
+    res.status(200).send(response.rows);
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
 });
 
 router.get("/:id", authAdmin, async (req, res) => {
@@ -79,4 +91,7 @@ router.post("/", authUser, async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = {
+  router,
+  deleteFeedback
+};

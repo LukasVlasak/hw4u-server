@@ -49,6 +49,21 @@ router.get("/active", authUser, async (req, res) => {
   }
 });
 
+router.get("/by-user", authUser, async (req, res) => {
+  try {
+    const response = await pool.query("select pu.answered, p.* from product_app_user pu left join product p on p.product_id = pu.product_id where pu.app_user_id = $1", [
+      req.user.app_user_id
+    ]);
+    
+
+    res.status(200).send(response.rows);
+    
+  } catch (err) {
+    sendAndLog(err);
+    res.status(500).send({ message: err.message });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const response = await pool.query(
@@ -133,4 +148,4 @@ router.delete("/:id", authAdmin, async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = {router};

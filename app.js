@@ -2,16 +2,16 @@ const express = require("express");
 const fs = require("node:fs");
 const helmet = require("helmet");
 const app = express();
-const tasks = require("./src/routes/tasks");
-const users = require("./src/routes/users");
-const documents = require("./src/routes/documents");
-const auth = require("./src/routes/auth");
-const reviews = require("./src/routes/reviews");
-const answers = require("./src/routes/answers");
-const feedback = require("./src/routes/feedback");
-const payment = require("./src/routes/payment");
-const category = require("./src/routes/category");
-const product = require("./src/routes/product");
+const { router: tasks} = require("./src/routes/tasks");
+const { router: users} = require("./src/routes/users");
+const { router: documents} = require("./src/routes/documents");
+const { router: auth} = require("./src/routes/auth");
+const { router: reviews} = require("./src/routes/reviews");
+const { router: answers} = require("./src/routes/answers");
+const { router: feedback } = require("./src/routes/feedback");
+const { router: payment} = require("./src/routes/payment");
+const { router: category} = require("./src/routes/category");
+const { router: product } = require("./src/routes/product");
 const { sendAndLog } = require("./src/utils/sendMailAndLog");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -50,7 +50,7 @@ app.use((error, req, res, next) => {
     next();
   }
 });
-//app.use("/api/answers", answers);
+app.use("/api/answers", answers);
 app.use("/api/auth", auth);
 app.use("/api/users", users);
 app.use("/api/tasks", tasks);
@@ -58,7 +58,7 @@ app.use("/api/reviews", reviews);
 app.use("/api/category", category);
 app.use("/api/product", product);
 app.use("/api/payment", payment);
-// app.use("/api/documents", documents);
+app.use("/api/documents", documents);
 app.use("/api/feedback", feedback);
 
 app.get("/api/data", (req, res) => {

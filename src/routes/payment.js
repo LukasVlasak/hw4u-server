@@ -36,7 +36,7 @@ router.post("/", auth.authUser, async (req, res) => {
     }
 
     const payments = await pool.query("SELECT * from product_app_user WHERE app_user_id = $1", [
-      user.rows[0].app_user_id
+      req.user.app_user_id
     ]);
 
     if (payments.rowCount > 0) {
@@ -52,4 +52,4 @@ router.post("/", auth.authUser, async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = {router};

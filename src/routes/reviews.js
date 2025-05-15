@@ -15,7 +15,7 @@ const deleteReview = async (reviewId) => {
   }
   return true;
 }
-module.exports.deleteReview = deleteReview;
+
 // router.get("/", (req, res) => {
 //   pool
 //     .query(getAllQuery("reviews"))
@@ -42,9 +42,9 @@ router.get("/by-user/:id", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  try {
+  try {    
     const response = await pool.query(
-      "SELECT r.review_id, r.text, r.app_user_id, u.email, uu.email as for_user_email, r.stars FROM review r left join app_user u on u.app_user_id = r.app_user_id left join app_user uu on uu.app_user_id = r.for_app_user_id"
+      "select * from review_with_users"
     );
     res.status(200).send(response.rows);
   } catch (err) {
@@ -119,4 +119,7 @@ router.post("/", auth.authUser, async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = {
+  deleteReview,
+  router,
+};
